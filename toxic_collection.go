@@ -8,6 +8,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/Shopify/toxiproxy/meta"
 	"github.com/Shopify/toxiproxy/stream"
 	"github.com/Shopify/toxiproxy/toxics"
 )
@@ -169,11 +170,11 @@ func (c *ToxicCollection) RemoveToxic(name string) error {
 	return ErrToxicNotFound
 }
 
-func (c *ToxicCollection) StartLink(name string, input io.Reader, output io.WriteCloser, direction stream.Direction) {
+func (c *ToxicCollection) StartLink(name string, input io.Reader, output io.WriteCloser, direction stream.Direction, connectionMeta *meta.ConnectionMeta) {
 	c.Lock()
 	defer c.Unlock()
 
-	link := NewToxicLink(c.proxy, c, direction)
+	link := NewToxicLink(c.proxy, c, direction, connectionMeta)
 	link.Start(name, input, output)
 	c.links[name] = link
 }

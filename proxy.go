@@ -4,6 +4,7 @@ import (
 	"errors"
 	"sync"
 
+	"github.com/Shopify/toxiproxy/meta"
 	"github.com/Shopify/toxiproxy/stream"
 	"github.com/sirupsen/logrus"
 	tomb "gopkg.in/tomb.v1"
@@ -172,12 +173,17 @@ func (proxy *Proxy) server() {
 		}
 
 		name := client.RemoteAddr().String()
+
+		connectionMeta := meta.ConnectionMeta{
+			DownstreamAddress: name,
+		}
+
 		proxy.connections.Lock()
 		proxy.connections.list[name+"upstream"] = upstream
 		proxy.connections.list[name+"downstream"] = client
 		proxy.connections.Unlock()
-		proxy.Toxics.StartLink(name+"upstream", client, upstream, stream.Upstream)
-		proxy.Toxics.StartLink(name+"downstream", upstream, client, stream.Downstream)
+		proxy.Toxics.StartLink(name+"upstream", client, upstream, stream.Upstream, &connectionMeta)
+		proxy.Toxics.StartLink(name+"downstream", upstream, client, stream.Downstream, &connectionMeta)
 	}
 }
 

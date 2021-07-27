@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/Shopify/toxiproxy/meta"
 	"github.com/Shopify/toxiproxy/stream"
 	"github.com/Shopify/toxiproxy/toxics"
 )
@@ -33,7 +34,10 @@ func checkRemainingChunks(t *testing.T, output chan *stream.StreamChunk) {
 func check(t *testing.T, toxic *toxics.LimitDataToxic, chunks [][]byte, expectedChunks [][]byte) {
 	input := make(chan *stream.StreamChunk)
 	output := make(chan *stream.StreamChunk, 100)
-	stub := toxics.NewToxicStub(input, output)
+	connectionMeta := meta.ConnectionMeta{
+		DownstreamAddress: "127.0.0.1",
+	}
+	stub := toxics.NewToxicStub(input, output, &connectionMeta)
 	stub.State = toxic.NewState()
 
 	go toxic.Pipe(stub)
@@ -54,7 +58,10 @@ func TestLimitDataToxicMayBeRestarted(t *testing.T) {
 
 	input := make(chan *stream.StreamChunk)
 	output := make(chan *stream.StreamChunk, 100)
-	stub := toxics.NewToxicStub(input, output)
+	connectionMeta := meta.ConnectionMeta{
+		DownstreamAddress: "127.0.0.1",
+	}
+	stub := toxics.NewToxicStub(input, output, &connectionMeta)
 	stub.State = toxic.NewState()
 
 	buf := buffer(90)
@@ -85,7 +92,10 @@ func TestLimitDataToxicMayBeInterrupted(t *testing.T) {
 
 	input := make(chan *stream.StreamChunk)
 	output := make(chan *stream.StreamChunk)
-	stub := toxics.NewToxicStub(input, output)
+	connectionMeta := meta.ConnectionMeta{
+		DownstreamAddress: "127.0.0.1",
+	}
+	stub := toxics.NewToxicStub(input, output, &connectionMeta)
 	stub.State = toxic.NewState()
 
 	go func() {
@@ -100,7 +110,10 @@ func TestLimitDataToxicNilShouldClosePipe(t *testing.T) {
 
 	input := make(chan *stream.StreamChunk)
 	output := make(chan *stream.StreamChunk)
-	stub := toxics.NewToxicStub(input, output)
+	connectionMeta := meta.ConnectionMeta{
+		DownstreamAddress: "127.0.0.1",
+	}
+	stub := toxics.NewToxicStub(input, output, &connectionMeta)
 	stub.State = toxic.NewState()
 
 	go func() {

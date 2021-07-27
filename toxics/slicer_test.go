@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Shopify/toxiproxy/meta"
 	"github.com/Shopify/toxiproxy/stream"
 	"github.com/Shopify/toxiproxy/toxics"
 )
@@ -16,7 +17,10 @@ func TestSlicerToxic(t *testing.T) {
 
 	input := make(chan *stream.StreamChunk)
 	output := make(chan *stream.StreamChunk)
-	stub := toxics.NewToxicStub(input, output)
+	connectionMeta := meta.ConnectionMeta{
+		DownstreamAddress: "127.0.0.1",
+	}
+	stub := toxics.NewToxicStub(input, output, &connectionMeta)
 
 	done := make(chan bool)
 	go func() {

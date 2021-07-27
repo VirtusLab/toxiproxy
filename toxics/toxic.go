@@ -1,6 +1,7 @@
 package toxics
 
 import (
+	"github.com/Shopify/toxiproxy/meta"
 	"math/rand"
 	"reflect"
 	"sync"
@@ -59,17 +60,19 @@ type ToxicStub struct {
 	Input     <-chan *stream.StreamChunk
 	Output    chan<- *stream.StreamChunk
 	State     interface{}
+	Meta	  *meta.ConnectionMeta
 	Interrupt chan struct{}
 	running   chan struct{}
 	closed    chan struct{}
 }
 
-func NewToxicStub(input <-chan *stream.StreamChunk, output chan<- *stream.StreamChunk) *ToxicStub {
+func NewToxicStub(input <-chan *stream.StreamChunk, output chan<- *stream.StreamChunk, connectionMeta *meta.ConnectionMeta) *ToxicStub {
 	return &ToxicStub{
 		Interrupt: make(chan struct{}),
 		closed:    make(chan struct{}),
 		Input:     input,
 		Output:    output,
+		Meta:      connectionMeta,
 	}
 }
 

@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Shopify/toxiproxy/meta"
 	"github.com/Shopify/toxiproxy/stream"
 	"github.com/Shopify/toxiproxy/testhelper"
 	"github.com/Shopify/toxiproxy/toxics"
@@ -19,7 +20,10 @@ func TestToxicsAreLoaded(t *testing.T) {
 
 func TestStubInitializaation(t *testing.T) {
 	collection := NewToxicCollection(nil)
-	link := NewToxicLink(nil, collection, stream.Downstream)
+	connectionMeta := meta.ConnectionMeta{
+		DownstreamAddress: "127.0.0.1",
+	}
+	link := NewToxicLink(nil, collection, stream.Downstream, &connectionMeta)
 	if len(link.stubs) != 1 {
 		t.Fatalf("Link created with wrong number of stubs: %d != 1", len(link.stubs))
 	} else if cap(link.stubs) != toxics.Count()+1 {
@@ -46,7 +50,10 @@ func TestStubInitializaationWithToxics(t *testing.T) {
 		Direction: stream.Downstream,
 		Toxicity:  1,
 	})
-	link := NewToxicLink(nil, collection, stream.Downstream)
+	connectionMeta := meta.ConnectionMeta{
+		DownstreamAddress: "127.0.0.1",
+	}
+	link := NewToxicLink(nil, collection, stream.Downstream, &connectionMeta)
 	if len(link.stubs) != 3 {
 		t.Fatalf("Link created with wrong number of stubs: %d != 3", len(link.stubs))
 	} else if cap(link.stubs) != toxics.Count()+1 {
@@ -63,7 +70,10 @@ func TestStubInitializaationWithToxics(t *testing.T) {
 
 func TestAddRemoveStubs(t *testing.T) {
 	collection := NewToxicCollection(nil)
-	link := NewToxicLink(nil, collection, stream.Downstream)
+	connectionMeta := meta.ConnectionMeta{
+		DownstreamAddress: "127.0.0.1",
+	}
+	link := NewToxicLink(nil, collection, stream.Downstream, &connectionMeta)
 	go link.stubs[0].Run(collection.chain[stream.Downstream][0])
 	collection.links["test"] = link
 
@@ -106,7 +116,10 @@ func TestAddRemoveStubs(t *testing.T) {
 
 func TestNoDataDropped(t *testing.T) {
 	collection := NewToxicCollection(nil)
-	link := NewToxicLink(nil, collection, stream.Downstream)
+	connectionMeta := meta.ConnectionMeta{
+		DownstreamAddress: "127.0.0.1",
+	}
+	link := NewToxicLink(nil, collection, stream.Downstream, &connectionMeta)
 	go link.stubs[0].Run(collection.chain[stream.Downstream][0])
 	collection.links["test"] = link
 
@@ -162,7 +175,10 @@ func TestNoDataDropped(t *testing.T) {
 
 func TestToxicity(t *testing.T) {
 	collection := NewToxicCollection(nil)
-	link := NewToxicLink(nil, collection, stream.Downstream)
+	connectionMeta := meta.ConnectionMeta{
+		DownstreamAddress: "127.0.0.1",
+	}
+	link := NewToxicLink(nil, collection, stream.Downstream, &connectionMeta)
 	go link.stubs[0].Run(collection.chain[stream.Downstream][0])
 	collection.links["test"] = link
 
@@ -209,7 +225,10 @@ func TestToxicity(t *testing.T) {
 
 func TestStateCreated(t *testing.T) {
 	collection := NewToxicCollection(nil)
-	link := NewToxicLink(nil, collection, stream.Downstream)
+	connectionMeta := meta.ConnectionMeta{
+		DownstreamAddress: "127.0.0.1",
+	}
+	link := NewToxicLink(nil, collection, stream.Downstream, &connectionMeta)
 	go link.stubs[0].Run(collection.chain[stream.Downstream][0])
 	collection.links["test"] = link
 

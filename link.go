@@ -3,6 +3,7 @@ package toxiproxy
 import (
 	"io"
 
+	"github.com/Shopify/toxiproxy/meta"
 	"github.com/Shopify/toxiproxy/stream"
 	"github.com/Shopify/toxiproxy/toxics"
 	"github.com/sirupsen/logrus"
@@ -21,15 +22,17 @@ type ToxicLink struct {
 	stubs     []*toxics.ToxicStub
 	proxy     *Proxy
 	toxics    *ToxicCollection
+	meta      *meta.ConnectionMeta
 	input     *stream.ChanWriter
 	output    *stream.ChanReader
 	direction stream.Direction
 }
 
-func NewToxicLink(proxy *Proxy, collection *ToxicCollection, direction stream.Direction) *ToxicLink {
+func NewToxicLink(proxy *Proxy, collection *ToxicCollection, direction stream.Direction, connectionMeta *meta.ConnectionMeta) *ToxicLink {
 	link := &ToxicLink{
 		stubs:     make([]*toxics.ToxicStub, len(collection.chain[direction]), cap(collection.chain[direction])),
 		proxy:     proxy,
+		meta:      connectionMeta,
 		toxics:    collection,
 		direction: direction,
 	}
@@ -45,7 +48,7 @@ func NewToxicLink(proxy *Proxy, collection *ToxicCollection, direction stream.Di
 			next = make(chan *stream.StreamChunk)
 		}
 
-		link.stubs[i] = toxics.NewToxicStub(last, next)
+		link.stubs[i] = toxics.NewToxicStub(last, next, connectionMeta)
 		last = next
 	}
 	link.output = stream.NewChanReader(last)
@@ -92,7 +95,7 @@ func (link *ToxicLink) AddToxic(toxic *toxics.ToxicWrapper) {
 	i := len(link.stubs)
 
 	newin := make(chan *stream.StreamChunk, toxic.BufferSize)
-	link.stubs = append(link.stubs, toxics.NewToxicStub(newin, link.stubs[i-1].Output))
+	link.stubs = append(link.stubs, toxics.NewToxicStub(newin, link.stubs[i-1].Output, link.meta))
 
 	// Interrupt the last toxic so that we don't have a race when moving channels
 	if link.stubs[i-1].InterruptToxic() {
